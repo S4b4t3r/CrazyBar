@@ -1,22 +1,65 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using TMPro;
-
 public class UIController : MonoBehaviour
 {
-    public GameObject retryPrompt;
-    public TMP_Text scoreText;
-    public GameObject tutorialPrompt;
-    public GameObject blackFade;
+    [SerializeField] GameObject retryPrompt;
+    [SerializeField] TMP_Text scoreText;
+    [SerializeField] GameObject tutorialPrompt;
+    [SerializeField] Animation blackFadeAnim;
+    [SerializeField] HighscoreToast highscoreToast;
+    [SerializeField] GameObject tickerPrefab;
+    public bool PopupShown = false;
 
-    public void ShowPopup(int score, int hiScore, bool isHighScore)
+    void Start() {
+        PopupShown = false;
+        retryPrompt.SetActive(false);
+        tutorialPrompt.SetActive(false);
+        blackFadeAnim.Play("FadeIn");
+    }
+
+    void Update()
     {
+        if (PopupShown && !Anatidae.HighscoreManager.IsHighscoreInputScreenShown){
+            if (Input.GetButtonDown("P1_B1")){
+                RetryBtn();
+                PopupShown = false;
+            }
+        }
+    }
+
+    public void ShowPopup(int score, int hiScore, bool isHighscore)
+    {
+        if (isHighscore && Anatidae.HighscoreManager.IsHighscore(score))
+        {
+            if (Anatidae.HighscoreManager.PlayerName == null) {
+                Anatidae.HighscoreManager.ShowHighscoreInput(score);
+            }
+            else {
+                Anatidae.HighscoreManager.SetHighscore(Anatidae.HighscoreManager.PlayerName, score).ContinueWith(task => {
+                    if (task.IsFaulted)
+                        Debug.LogError(task.Exception);
+                    else {
+                        highscoreToast.Name = Anatidae.HighscoreManager.PlayerName;
+                        highscoreToast.ShowPopup();
+                    }
+                });
+            }
+        }
+
         scoreText.text = "Score: " + score.ToString() + "\n" + "HiScore: " + hiScore.ToString();
 
-        Animation anim = retryPrompt.GetComponent<Animation>();
-        anim.Play("PopIn");
+        retryPrompt.SetActive(true);
+        StartCoroutine(RetryBtnDebounce());
+    }
+
+    public void SpawnTicker(Vector3 worldSpacePosition, int value)
+    {
+        Vector3 uiSpacePosition = new Vector3(worldSpacePosition.x * 54f, worldSpacePosition.y * 54f, 0);
+        Ticker ticker = Instantiate(tickerPrefab, gameObject.transform).GetComponent<Ticker>();
+        ticker.SetPosition(uiSpacePosition);
+        ticker.SetValue(value);
     }
 
     public void ShowTutorial()
@@ -26,20 +69,26 @@ public class UIController : MonoBehaviour
 
     public void StartBtn()
     {
-        blackFade.GetComponent<Animator>().SetTrigger("FadeOut");
-        StartCoroutine("RestartLevelCoroutine"); // :)
+        blackFadeAnim.Play("FadeOut");
+        StartCoroutine(RestartLevelCoroutine()); // :)
     }
 
     public void RetryBtn()
     {
-        blackFade.GetComponent<Animator>().SetTrigger("FadeOut");
-        StartCoroutine("RestartLevelCoroutine");
+        blackFadeAnim.Play("FadeOut");
+        StartCoroutine(RestartLevelCoroutine());
+    }
+
+    IEnumerator RetryBtnDebounce()
+    {
+        yield return new WaitForSeconds(1.5f);
+        PopupShown = true;
     }
 
     IEnumerator RestartLevelCoroutine()
     {
         yield return new WaitForSeconds(0.6f);
-        LoadLevel("SampleScene");
+        LoadLevel("Game");
     }
 
     public void LoadLevel(string levelName)

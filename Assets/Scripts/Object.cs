@@ -9,7 +9,7 @@ public class Object : MonoBehaviour
     new Rigidbody2D rigidbody2D;
     new Collider2D collider2D;
     GameObject glow;
-    public AudioSource sfxGood;
+    [SerializeField] AudioSource sfxGood;
     
     ScoreManager scoreManager;
     public bool isOnPlateau = false;
@@ -60,7 +60,7 @@ public class Object : MonoBehaviour
                     {
                         scoreManager.AddToScore(
 							1, 
-							GameObject.ReferenceEquals(col.gameObject, scoreManager.GetLastProp()) 
+							ReferenceEquals(col.gameObject, scoreManager.GetLastProp()) 
 							? true 
 							: false
 						);
@@ -103,7 +103,6 @@ public class Object : MonoBehaviour
         rigidbody2D.velocity = Vector2.up * 6f + (Vector2.left * (4.5f + transform.position.x)* .8f); // Left force based on distance to tables
         
         StartCoroutine(Despawn());
-        // TODO : si Game Over, faire tomber les items par terre ?
     }
 
     IEnumerator Despawn()

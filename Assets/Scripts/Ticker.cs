@@ -1,12 +1,13 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
 public class Ticker : MonoBehaviour
 {
+    [SerializeField] Color posColor;
+    [SerializeField] Color negColor;
+
     TMP_Text tmpText;
-    void Start()
+    void Awake()
     {
         tmpText = GetComponentInChildren<TMP_Text>();
     }
@@ -16,6 +17,15 @@ public class Ticker : MonoBehaviour
         tmpText.text = text;
     }
 
+    public void SetValue(int value)
+    {
+        tmpText.text = $"{(value>0?'+':'-')}{value}";
+        if (value>0)
+            SetColor(posColor);
+        else
+            SetColor(negColor);
+    }
+
     public void SetColor(Color color)
     {
         tmpText.color = color;
@@ -23,7 +33,7 @@ public class Ticker : MonoBehaviour
 
     public void SetPosition(Vector2 position)
     {
-        tmpText.transform.position = position;
+        transform.localPosition = position;
     }
 
     public void Destroy()

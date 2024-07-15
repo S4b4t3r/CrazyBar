@@ -3,24 +3,23 @@ using UnityEngine;
 
 public class TablesController : MonoBehaviour
 {
-    public float minTimeBeforeServe;
-    public float maxTimeBeforeServe;
+    [SerializeField] float minTimeBeforeServe;
+    [SerializeField] float maxTimeBeforeServe;
     float currentTimeOffset;
     float timeBeforeServe;
-    public bool canServe;
+    [SerializeField] bool canServe;
     int numberOfItems;
     new Collider2D collider;
-    public GameObject serveSprite;
-    public Sprite[] stuffArray;
-    public SpriteRenderer stuffRenderer; 
-    public PlayerController playerController;
-    public ScoreManager scoreManager;
+    [SerializeField] GameObject serveSprite;
+    [SerializeField] Sprite[] stuffArray;
+    [SerializeField] SpriteRenderer stuffRenderer; 
+    [SerializeField] PlayerController playerController;
+    [SerializeField] ScoreManager scoreManager;
+    [SerializeField] UIController uIController;
     
-    public AudioSource sfx;
-    public AudioSource dishes;
+    [SerializeField] AudioSource sfx;
+    [SerializeField] AudioSource dishes;
     GameManager gameManager;
-
-    public GameObject ticker;
     
     float exponentialScore;
 
@@ -29,7 +28,7 @@ public class TablesController : MonoBehaviour
     {
         collider = GetComponent<Collider2D>();
         SetNewTimeBeforeServe();
-        collider.enabled = false; // WARN : vérifier si activer le collider pdt que le joueur est dedans capte la collision côté joueur
+        collider.enabled = false; 
         gameManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameManager>();
     }
 
@@ -77,15 +76,11 @@ public class TablesController : MonoBehaviour
 
             Sprite stuffToRender = stuffArray[Mathf.Clamp((numberOfItems+3)/6, 0, stuffArray.Length-1)];
             stuffRenderer.sprite = stuffToRender;
-
-            exponentialScore = amount + Mathf.Pow((int)Mathf.Round(amount / 5) + 1, 2);
-
-            scoreManager.AddToScore((int)exponentialScore, false);
-            
+            exponentialScore = amount + Mathf.Pow((int)Mathf.Round(amount / 6) + 1, 2);
+            scoreManager.AddToScore((int)exponentialScore, false); 
             dishes.Play();
-            
-            
-            
+            uIController.SpawnTicker(transform.position + new Vector3(0f,1f), (int)exponentialScore);
+
             SetNewTimeBeforeServe();
         }
     }

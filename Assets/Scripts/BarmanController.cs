@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class BarmanController : MonoBehaviour
 {
-    public GameObject thrownProp;
-    public AudioSource throwSound;
-    public ObjectSpawner objectSpawner;
+    [SerializeField] GameObject thrownProp;
+    [SerializeField] AudioSource throwSound;
+    [SerializeField] ObjectSpawner objectSpawner;
     Animator animator;
     // Start is called before the first frame update
     void Start()

@@ -4,12 +4,12 @@ using UnityEngine;
 
 public class ObjectSpawner : MonoBehaviour
 {
-    public GameObject[] props;
-    public float spawnInterval;
-    public float updateDifficultyEvery;
-    public float updateSpeedBy;
-    public AudioSource freefall;
-    public BarmanController barman;
+    [SerializeField] GameObject[] props;
+    [SerializeField] float spawnInterval;
+    [SerializeField] float updateDifficultyEvery;
+    [SerializeField] float updateSpeedBy;
+    [SerializeField] AudioSource freefall;
+    [SerializeField] BarmanController barman;
     float currentIntervalRemaining;
 
     float counter = 0f;

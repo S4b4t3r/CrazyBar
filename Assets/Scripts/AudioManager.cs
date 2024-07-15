@@ -10,10 +10,10 @@ public class AudioManager : MonoBehaviour
 
         if (objs.Length > 1)
         {
-            Destroy(this.gameObject);
+            Destroy(gameObject);
         }
 
-        DontDestroyOnLoad(this.gameObject);
+        DontDestroyOnLoad(gameObject);
     }
     public AudioSource mainMusic;
     
@@ -21,12 +21,6 @@ public class AudioManager : MonoBehaviour
     void Start()
     {
         mainMusic.Play();
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 
     public void SetMusicPitch(float pitch)

@@ -2,20 +2,24 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Runtime.InteropServices;
 
 public class GameManager : MonoBehaviour
 {
     int retryCount = -1;
-    public ObjectSpawner objectSpawner;
-    public PlateauController plateauController;
-    public PlayerController playerController;
-    public UIController uIController;
-    public AudioManager audioManager;
-    public ScoreManager scoreManager;
+    [SerializeField] ObjectSpawner objectSpawner;
+    [SerializeField] PlateauController plateauController;
+    [SerializeField] PlayerController playerController;
+    [SerializeField] UIController uIController;
+    [SerializeField] AudioManager audioManager;
+    [SerializeField] ScoreManager scoreManager;
     bool isGameOver = false;
     float sceneLoadedTime;
     float gameOverTime;
     int hiScore;
+
+    [DllImport("__Internal")]
+    private static extern void BackToMenu();
     
     // called first
     void OnEnable()
@@ -28,8 +32,6 @@ public class GameManager : MonoBehaviour
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         retryCount++;
-        // Debug.Log("OnSceneLoaded: " + scene.name);
-        // Debug.Log(mode);
         sceneLoadedTime = Time.realtimeSinceStartup;
 
         objectSpawner = GameObject.FindGameObjectWithTag("ObjectSpawner").GetComponent<ObjectSpawner>();
@@ -52,15 +54,16 @@ public class GameManager : MonoBehaviour
 
         if (objs.Length > 1)
         {
-            Destroy(this.gameObject);
+            Destroy(gameObject);
         }
 
-        DontDestroyOnLoad(this.gameObject);
+        DontDestroyOnLoad(gameObject);
     }
 
     void Start()
     {
         Application.targetFrameRate = 60;
+        Anatidae.HighscoreManager.GetHighscores();
     }
 
     float pitch;
@@ -116,5 +119,10 @@ public class GameManager : MonoBehaviour
     public bool getIsGameOver()
     {
         return isGameOver;
+    }
+
+    public void OnApplicationQuit()
+    {
+        BackToMenu();
     }
 }

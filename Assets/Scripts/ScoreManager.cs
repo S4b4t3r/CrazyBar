@@ -5,25 +5,27 @@ using TMPro;
 
 public class ScoreManager : MonoBehaviour
 {
+    [SerializeField] UIController uIController;
     public int defaultScore;
     
-    public TMP_Text scoreUI;
-    public GameObject scoreUIClone;
+    [SerializeField] TMP_Text scoreUI;
+    [SerializeField] GameObject scoreUIClone;
     TMP_Text scoreUICloneText;
 
-    public TMP_Text comboUI;
-    public GameObject comboUIClone;
+    [SerializeField] TMP_Text comboUI;
+    [SerializeField] GameObject comboUIClone;
     TMP_Text comboUICloneText;
 
-    public AudioSource comboSound;
+    [SerializeField] AudioSource comboSound;
     int combo = 1;
     int score;
+    int lastValueAdded;
     GameObject lastProp;
 
     void Start()
     {
-        scoreUICloneText = scoreUIClone.GetComponent<TMP_Text>();
-        comboUICloneText = comboUIClone.GetComponent<TMP_Text>();
+        scoreUICloneText = scoreUIClone.GetComponentInChildren<TMP_Text>();
+        comboUICloneText = comboUIClone.GetComponentInChildren<TMP_Text>();
     }
 
     public void AddToScore(int value, bool comboing)
@@ -42,7 +44,8 @@ public class ScoreManager : MonoBehaviour
             comboSound.pitch = 1f;
             combo = 1;
         }
-        score += value + combo - 1;
+        lastValueAdded = value + combo - 1;
+        score += lastValueAdded;
         scoreUI.text = score.ToString();
         comboUI.text = combo.ToString() + "x";
 
@@ -59,6 +62,7 @@ public class ScoreManager : MonoBehaviour
     public void AddLastProp(GameObject newProp)
     {
         lastProp = newProp;
+        uIController.SpawnTicker(lastProp.transform.position, lastValueAdded);
     }
 
     public int GetScore()

@@ -1,7 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
@@ -10,25 +7,36 @@ public class PlayerController : MonoBehaviour
     float inputHorizontal = 0f;
     // float inputVertical = 0f;
     bool freezeMovement = false;
-    public float playerSpeed = 10f;
-    public float sprintSpeed = 20f;
-    public float sprintReloadRate = 30f;
-    public float sprintDuration = 100f;
-    public AudioSource fail;
-    float currentPlayerSpeed;
-    public Image staminaBar;
+    [SerializeField] float normalSpeed = 10f;
+    [SerializeField] float sprintSpeed = 20f;
+    [SerializeField] float sprintReloadRate = 30f;
+    [SerializeField] float sprintUsageRate = 100f;
+    [SerializeField] AudioSource fail;
+    float speedMultiplier;
+    [SerializeField] GameObject staminaBar;
+    [SerializeField] Transform staminaInsideBar;
     float stamina = 100f;
     bool canServe = false;
 
-    public GameObject spriteHolder;
-    public TablesController tablesController;
+    [SerializeField] GameObject spriteHolder;
+    [SerializeField] TablesController tablesController;
 
     void Start()
     {
         rigidbody2D = GetComponent<Rigidbody2D>();
         hand = GetComponent<HingeJoint2D>();
-        currentPlayerSpeed = playerSpeed;
-    }   
+        speedMultiplier = normalSpeed;
+    }
+
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            Application.Quit();
+        }
+
+        staminaBar.gameObject.SetActive(stamina != 100f);
+    }
 
     // Update is called once per frame
     void FixedUpdate()
@@ -38,25 +46,23 @@ public class PlayerController : MonoBehaviour
             inputHorizontal = 0f;
         } else {
 
-            inputHorizontal = Input.GetAxisRaw("Horizontal");
+            inputHorizontal = Input.GetAxisRaw("P1_Horizontal");
             
             // Sprint System
+            staminaInsideBar.localScale = new Vector3(stamina/100f, 1f, 1f);
 
-            staminaBar.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, stamina * 2f);
-
-            if(Input.GetButton("Sprint"))
+            if(Input.GetButton("P1_B1"))
             {
                 if(stamina > 0f) {
-                    currentPlayerSpeed = sprintSpeed;
-                    stamina = stamina - sprintDuration * Time.deltaTime;
+                    speedMultiplier = sprintSpeed;
+                    if (inputHorizontal != 0)
+                        stamina = stamina - sprintUsageRate * Time.deltaTime;
                 } else {
-                    currentPlayerSpeed = playerSpeed;
+                    speedMultiplier = normalSpeed;
                     stamina = 0f;
                 }
-            }
-            if(!Input.GetButton("Sprint"))
-            {
-                currentPlayerSpeed = playerSpeed;
+            } else {
+                speedMultiplier = normalSpeed;
                 if(stamina < 100f) {
                     stamina = stamina + sprintReloadRate * Time.deltaTime;
                 } else {
@@ -65,10 +71,9 @@ public class PlayerController : MonoBehaviour
             }
 
             // Serve Input
-
             if(canServe)
             {
-                if (Input.GetButton("Serve"))
+                if (Input.GetButton("P1_B2"))
                 {
                     // Move objects to Table
                     GameObject[] objects;
@@ -91,8 +96,7 @@ public class PlayerController : MonoBehaviour
                 }
             }
 
-            // Movement System
-
+            // Movement Animation
             if(inputHorizontal > 0f) {
                 spriteHolder.GetComponent<SpriteRenderer>().flipX = false;
             } else if(inputHorizontal < 0f) {
@@ -106,10 +110,9 @@ public class PlayerController : MonoBehaviour
             }
 
             // Movement Rigidbody
-
             rigidbody2D.MovePosition(
                 new Vector2(
-                    rigidbody2D.position.x + inputHorizontal*Time.deltaTime*currentPlayerSpeed,
+                    rigidbody2D.position.x + inputHorizontal*Time.deltaTime*speedMultiplier,
                     rigidbody2D.position.y
                 )
             );
