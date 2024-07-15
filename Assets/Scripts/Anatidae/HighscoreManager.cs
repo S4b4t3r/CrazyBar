@@ -32,7 +32,7 @@ namespace Anatidae {
         [SerializeField] HighscoreNameInput highscoreNameInput;
         [SerializeField] HighscoreUI highscoreUi;
 
-        void Start()
+        void Awake()
         {
             if (Instance == null){
                 Instance = this;

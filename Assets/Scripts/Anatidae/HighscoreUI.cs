@@ -49,6 +49,8 @@ namespace Anatidae {
 
         void UpdateHighscoreEntries()
         {
+            float prefabHeight = highscoreEntryPrefab.GetComponent<RectTransform>().sizeDelta.y;
+            Debug.Log(prefabHeight);
             foreach (Transform child in highscoreEntryContainer.transform)
             {
                 Destroy(child.gameObject);
@@ -60,7 +62,7 @@ namespace Anatidae {
                 GameObject entry = Instantiate(highscoreEntryPrefab, highscoreEntryContainer);
                 entry.transform.localPosition = new Vector3(
                     0f,
-                    -i * 50 + 10 + (makeFirstBigger && i != 0 ? -10 : 0),
+                    -i * prefabHeight + 10f,
                     0f
                 );
                 HighscoreEntry highscoreEntry = entry.GetComponent<HighscoreEntry>();

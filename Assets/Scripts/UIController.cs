@@ -12,20 +12,38 @@ public class UIController : MonoBehaviour
     [SerializeField] GameObject tickerPrefab;
     public bool PopupShown = false;
 
-    void Start() {
+    void Awake() {
         PopupShown = false;
-        retryPrompt.SetActive(false);
-        tutorialPrompt.SetActive(false);
         blackFadeAnim.Play("FadeIn");
+        switch (SceneManager.GetActiveScene().name)
+        {
+            case "MainMenuScene":
+                Anatidae.HighscoreManager.ShowHighscores();
+                break;
+            case "Game":
+                retryPrompt.SetActive(false);
+                tutorialPrompt.SetActive(false);
+                break;
+
+        }
     }
 
     void Update()
     {
-        if (PopupShown && !Anatidae.HighscoreManager.IsHighscoreInputScreenShown){
-            if (Input.GetButtonDown("P1_B1")){
-                RetryBtn();
-                PopupShown = false;
-            }
+        switch (SceneManager.GetActiveScene().name)
+        {
+            case "Game":
+                if (PopupShown && !Anatidae.HighscoreManager.IsHighscoreInputScreenShown){
+                    if (Input.GetButtonDown("P1_B1")){
+                        RetryBtn();
+                        PopupShown = false;
+                    }
+                }
+                break;
+            case "MainMenuScene":
+                if (Input.GetButtonDown("P1_B1"))
+                    RetryBtn();
+                break;
         }
     }
 
@@ -65,12 +83,6 @@ public class UIController : MonoBehaviour
     public void ShowTutorial()
     {
         tutorialPrompt.SetActive(true);
-    }
-
-    public void StartBtn()
-    {
-        blackFadeAnim.Play("FadeOut");
-        StartCoroutine(RestartLevelCoroutine()); // :)
     }
 
     public void RetryBtn()
