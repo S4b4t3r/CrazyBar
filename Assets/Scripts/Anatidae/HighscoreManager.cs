@@ -16,6 +16,8 @@ using UnityEditor;
 using System.Linq;
 
 namespace Anatidae {
+
+    
     public class HighscoreManager : MonoBehaviour
     {
         struct HighscoreData
@@ -149,12 +151,13 @@ namespace Anatidae {
             }
         }
 
-        public static bool IsHighscore(int score, string name = null)
+        public static bool IsHighscore(int score)
         {
-            Debug.Log($"Checking if {name} with score {score} is a highscore.");
-
-            Debug.Log((Highscores.Count < 10)? "Less than 10 scores": $"Lowest score is {Highscores.Values.Skip(9).Take(1).First()}");
-
+            return IsHighscore(null, score);
+        }
+        
+        public static bool IsHighscore(string name, int score)
+        {
             if (name == null)
             {
                 if (Highscores == null)
