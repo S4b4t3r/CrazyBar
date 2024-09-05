@@ -30,11 +30,6 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            Application.Quit();
-        }
-
         staminaBar.gameObject.SetActive(stamina != 100f);
     }
 

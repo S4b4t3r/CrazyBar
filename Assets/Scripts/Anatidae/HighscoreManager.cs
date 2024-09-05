@@ -55,6 +55,20 @@ namespace Anatidae {
         [DllImport("__Internal")]
         public static extern void BackToMenu();
 
+        float exitTimer = 0f;
+        const float exitTime = 1f;
+        void Update()
+        {
+            if (Input.GetButtonDown("Coin"))
+                exitTimer += Time.deltaTime;
+            else
+                exitTimer = 0f;
+            
+            if (exitTimer >= exitTime)
+                Application.Quit();
+
+        }
+
         public static void ShowHighscores()
         {
             if (Instance.highscoreUi is null){
@@ -100,7 +114,7 @@ namespace Anatidae {
         public static async Task<Dictionary<string, int>> GetHighscores()
         {
             HttpClient client = new HttpClient {
-                BaseAddress = new Uri("http://localhost:3000/api/?game=" + PlayerSettings.productName)
+                BaseAddress = new Uri("http://localhost:3000/api/?game=" + "WrecklessBar")
             };
             client.DefaultRequestHeaders.Accept.Add(
             new MediaTypeWithQualityHeaderValue("application/json"));
@@ -129,7 +143,7 @@ namespace Anatidae {
         public static async Task<bool> SetHighscore(string name, int score)
         {
             HttpClient client = new HttpClient {
-                BaseAddress = new Uri("http://localhost:3000/api/?game=" + PlayerSettings.productName)
+                BaseAddress = new Uri("http://localhost:3000/api/?game=" + "WrecklessBar")
             };
             client.DefaultRequestHeaders.Accept.Add(
                 new MediaTypeWithQualityHeaderValue("application/json")
