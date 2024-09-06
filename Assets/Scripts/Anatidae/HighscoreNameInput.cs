@@ -8,6 +8,7 @@ using TMPro;
 using UnityEngine;
 using System;
 using System.Text.RegularExpressions;
+using System.Collections;
 
 namespace Anatidae {
     public class HighscoreNameInput : MonoBehaviour
@@ -81,6 +82,8 @@ namespace Anatidae {
             {
                 if (carousselLetterIndex == alphabet.Length - 2) { // Submit
                     HighscoreManager.PlayerName = Regex.Replace(new string(playerName), @"\0", "_");
+
+                    /*
                     HighscoreManager.SetHighscore(HighscoreManager.PlayerName, highscore).ContinueWith(task => {
                         Debug.Log($"{task.IsCanceled}, {task.IsCompleted}, {task.IsCompletedSuccessfully}, {task.IsFaulted}, {task.Status}, {task.Exception}");
                         ;
@@ -91,6 +94,8 @@ namespace Anatidae {
                             Debug.Log("HighscoreNameInput: Highscore submitted");
                     });
                     return;
+                    */
+                    StartCoroutine(SetHighscore(HighscoreManager.PlayerName, highscore));
                 }
 
                 if (carousselLetterIndex == alphabet.Length - 1) { // Backspace
@@ -115,6 +120,13 @@ namespace Anatidae {
 
                 inputName.text = new string(playerName);
             }
+        }
+
+        IEnumerator SetHighscore(string name, int score)
+        {
+            yield return HighscoreManager.SetHighscoreUnity(name, score);
+            Debug.Log("HighscoreNameInput: Highscore submitted");
+            FadeoutHighscoreInput();
         }
     }
 }

@@ -12,7 +12,7 @@ public class UIController : MonoBehaviour
     [SerializeField] GameObject tickerPrefab;
     public bool PopupShown = false;
 
-    void Awake() {
+    void Start() {
         PopupShown = false;
         blackFadeAnim.Play("FadeIn");
         switch (SceneManager.GetActiveScene().name)
@@ -51,19 +51,10 @@ public class UIController : MonoBehaviour
     {
         if (isHighscore && Anatidae.HighscoreManager.IsHighscore(score))
         {
-            if (Anatidae.HighscoreManager.PlayerName == null) {
+            if (Anatidae.HighscoreManager.PlayerName == null)
                 Anatidae.HighscoreManager.ShowHighscoreInput(score);
-            }
-            else {
-                Anatidae.HighscoreManager.SetHighscore(Anatidae.HighscoreManager.PlayerName, score).ContinueWith(task => {
-                    if (task.IsFaulted)
-                        Debug.LogError(task.Exception);
-                    else {
-                        highscoreToast.Name = Anatidae.HighscoreManager.PlayerName;
-                        highscoreToast.ShowPopup();
-                    }
-                });
-            }
+            else
+                StartCoroutine(SetHighscore(Anatidae.HighscoreManager.PlayerName, score));
         }
 
         scoreText.text = "Score: " + score.ToString() + "\n" + "HiScore: " + hiScore.ToString();
@@ -106,5 +97,12 @@ public class UIController : MonoBehaviour
     public void LoadLevel(string levelName)
     {
         SceneManager.LoadScene(levelName);
+    }
+
+    IEnumerator SetHighscore(string name, int score)
+    {
+        yield return Anatidae.HighscoreManager.SetHighscoreUnity(name, score);
+        highscoreToast.Name = Anatidae.HighscoreManager.PlayerName;
+        highscoreToast.ShowPopup();
     }
 }

@@ -12,8 +12,9 @@ using System.Net.Http.Headers;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityEditor;
 using System.Linq;
+using UnityEngine.Networking;
+using System.Collections;
 
 namespace Anatidae {
 
@@ -111,7 +112,7 @@ namespace Anatidae {
             IsHighscoreInputScreenShown = false;
         }
 
-        public static async Task<Dictionary<string, int>> GetHighscores()
+        public static async Task<Dictionary<string, int>> FetchHighscores()
         {
             HttpClient client = new HttpClient {
                 BaseAddress = new Uri("http://localhost:3000/api/?game=" + "WrecklessBar")
@@ -121,7 +122,7 @@ namespace Anatidae {
             HttpResponseMessage response = await client.GetAsync("");
 
             if (response.IsSuccessStatusCode) {
-                var data = await response.Content.ReadAsStringAsync();
+                string data = await response.Content.ReadAsStringAsync();
                 try {
                     HighscoreData highscoreData = JsonConvert.DeserializeObject<HighscoreData>(data);
                     Highscores = highscoreData.highscores;
@@ -137,6 +138,28 @@ namespace Anatidae {
                 Debug.LogError($"{(int)response.StatusCode} ({response.ReasonPhrase})");
                 client.Dispose();
                 return null;
+            }
+        }
+
+        public static IEnumerator FetchHighscoresUnity()
+        {
+            UnityWebRequest request = UnityWebRequest.Get("http://localhost:3000/api/?game=" + "WrecklessBar");
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
+            {
+                Debug.LogError(request.error);
+            }
+            else
+            {
+                string data = request.downloadHandler.text;
+                try {
+                    HighscoreData highscoreData = JsonConvert.DeserializeObject<HighscoreData>(data);
+                    Highscores = highscoreData.highscores;
+                    HasFetchedHighscores = true;
+                } catch (Exception e) {
+                    Debug.LogError(e);
+                }
             }
         }
 
@@ -163,6 +186,18 @@ namespace Anatidae {
                 client.Dispose();
                 return false;
             }
+        }
+
+        public static IEnumerator SetHighscoreUnity(string name, int score)
+        {
+            UnityWebRequest request = UnityWebRequest.Post(
+                "http://localhost:3000/api/?game=" + "WrecklessBar",
+                JsonConvert.SerializeObject(new { name, score })
+            );
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
+                Debug.LogError(request.error);
         }
 
         public static bool IsHighscore(int score)

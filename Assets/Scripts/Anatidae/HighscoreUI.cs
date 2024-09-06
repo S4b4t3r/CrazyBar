@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 namespace Anatidae {
@@ -11,29 +12,23 @@ namespace Anatidae {
         [SerializeField][Tooltip("Rendre le premier score plus gros")] bool makeFirstBigger = true;
         [SerializeField][Tooltip("Défiler les scores de haut en bas automatiquement")] bool autoscroll = false;
 
-        private event Action mainThreadQueuedCallbacks;
+
 
         public void OnEnable()
         {
-            if (!HighscoreManager.HasFetchedHighscores)
-            {
-                HighscoreManager.GetHighscores().ContinueWith(task => {
-                    if (task.IsFaulted)
-                        Debug.LogError(task.Exception);
-                    else
-                        mainThreadQueuedCallbacks += UpdateHighscoreEntries;
-                });
-            } else mainThreadQueuedCallbacks += UpdateHighscoreEntries;
+            StartCoroutine(Init());
+        }
+
+        IEnumerator Init()
+        {
+            Debug.Log("Fetching highscores...", this);
+            yield return HighscoreManager.FetchHighscoresUnity();
+            UpdateHighscoreEntries();
+            yield break;
         }
 
         void Update()
         {
-            if (mainThreadQueuedCallbacks != null)
-            {
-                mainThreadQueuedCallbacks.Invoke();
-                mainThreadQueuedCallbacks = null;
-            }
-
             if (autoscroll)
             {
                 Vector3 scrollPosition = highscoreEntryContainer.localPosition;
