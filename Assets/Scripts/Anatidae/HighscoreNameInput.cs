@@ -53,21 +53,40 @@ namespace Anatidae {
             HighscoreManager.DisableHighscoreInput();
         }
 
+        const float repeatTime = .1f;
+        float lastKeyInputTime = 0f;
+        bool neutralInput;
+        bool inputLeft;
+        bool inputRight;
+
         void Update()
         {
             letterCaroussel.anchoredPosition = Vector2.Lerp(letterCaroussel.anchoredPosition, new Vector2(-carousselLetterIndex * 140, 0), Time.deltaTime * 10);
 
-            if (Input.GetButtonDown("P1_Left") || Input.GetButtonDown("P2_Left"))
+            neutralInput = Input.GetAxisRaw("P1_Horizontal") > -.9f && Input.GetAxisRaw("P1_Horizontal") < .9f;
+
+            if ((Input.GetAxisRaw("P1_Horizontal") < -.9f && neutralInput) || (Input.GetAxisRaw("P1_Horizontal") > .9f && neutralInput) || lastKeyInputTime + repeatTime < Time.time) {
+                neutralInput = false;
+                inputLeft = Input.GetAxisRaw("P1_Horizontal") < -.9f;
+                inputRight = Input.GetAxisRaw("P1_Horizontal") > .9f;
+            }
+
+            if (inputLeft)
             {
                 if (blockInput && carousselLetterIndex == alphabet.Length - 2) return;
                 carousselLetterIndex = (carousselLetterIndex - 1 + alphabet.Length) % alphabet.Length;
                 if (carousselLetterIndex == alphabet.Length - 1) letterCaroussel.anchoredPosition = new Vector2(alphabet.Length * -140, 0); // Wrap
+                inputLeft = false;
+                lastKeyInputTime = Time.time;
             }
-            else if (Input.GetButtonDown("P1_Right") || Input.GetButtonDown("P2_Right"))
+            else if (inputRight)
             {
                 if (blockInput && carousselLetterIndex == alphabet.Length - 1) return;
                 carousselLetterIndex = (carousselLetterIndex + 1) % alphabet.Length;
                 if (carousselLetterIndex == 0) letterCaroussel.anchoredPosition = new Vector2(140, 0); // Wrap
+                inputRight = false;
+                lastKeyInputTime = Time.time;
+
             }
             else if (Input.GetButtonDown("P1_B1") || Input.GetButtonDown("P2_B1"))
             {

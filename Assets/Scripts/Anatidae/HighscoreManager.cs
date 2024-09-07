@@ -2,10 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
-using System.Linq;
 using UnityEngine.Networking;
 using System.Collections;
-using System.Data.Common;
+using System.Text;
 
 namespace Anatidae {
 
@@ -123,10 +122,7 @@ namespace Anatidae {
             {
                 string data = request.downloadHandler.text;
                 try {
-                    Debug.Log(data);
                     HighscoreData highscoreData = JsonUtility.FromJson<HighscoreData>(data);
-                    Debug.Log(highscoreData);
-                    Debug.Log(highscoreData.highscores.Count);
                     Highscores = highscoreData.highscores;
                     HasFetchedHighscores = true;
                 } catch (Exception e) {
@@ -137,12 +133,18 @@ namespace Anatidae {
 
         public static IEnumerator SetHighscore(string name, int score)
         {
-            UnityWebRequest request = UnityWebRequest.Post(
-                "http://localhost:3000/api/?game=" + "WrecklessBar",
-                JsonUtility.ToJson(new { name, score })
-            );
-            yield return request.SendWebRequest();
+            Debug.Log(JsonUtility.ToJson(new HighscoreEntry { name = name, score = score }));
 
+            UnityWebRequest request = new UnityWebRequest("http://localhost:3000/api/?game=" + "WrecklessBar")
+            {
+                method = UnityWebRequest.kHttpVerbPOST,
+                uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(JsonUtility.ToJson(new HighscoreEntry { name = name, score = score })))
+                {
+                    contentType = "application/json"
+                }
+            };
+            
+            yield return request.SendWebRequest();
             if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
                 Debug.LogError(request.error);
         }

@@ -24,7 +24,7 @@ public class HighscoreToast : MonoBehaviour
     {
         if (showAtUpdateBecauseAsyncBs){
             text.text = $"Record enregistre sur {Name} !";
-            animation.Play("Popup");
+            animation.Play("Highscore_Popup");
             showAtUpdateBecauseAsyncBs = false;
         }
     }
