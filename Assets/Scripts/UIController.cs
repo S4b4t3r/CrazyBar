@@ -101,7 +101,7 @@ public class UIController : MonoBehaviour
 
     IEnumerator SetHighscore(string name, int score)
     {
-        yield return Anatidae.HighscoreManager.SetHighscoreUnity(name, score);
+        yield return Anatidae.HighscoreManager.SetHighscore(name, score);
         highscoreToast.Name = Anatidae.HighscoreManager.PlayerName;
         highscoreToast.ShowPopup();
     }

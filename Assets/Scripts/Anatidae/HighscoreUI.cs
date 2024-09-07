@@ -1,5 +1,5 @@
-using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Anatidae {
@@ -12,8 +12,6 @@ namespace Anatidae {
         [SerializeField][Tooltip("Rendre le premier score plus gros")] bool makeFirstBigger = true;
         [SerializeField][Tooltip("Défiler les scores de haut en bas automatiquement")] bool autoscroll = false;
 
-
-
         public void OnEnable()
         {
             StartCoroutine(Init());
@@ -22,9 +20,9 @@ namespace Anatidae {
         IEnumerator Init()
         {
             Debug.Log("Fetching highscores...", this);
-            yield return HighscoreManager.FetchHighscoresUnity();
+            yield return HighscoreManager.FetchHighscores();
+            Debug.Log("Highscores fetched!", this);
             UpdateHighscoreEntries();
-            yield break;
         }
 
         void Update()
@@ -41,7 +39,6 @@ namespace Anatidae {
             }
         }
 
-
         void UpdateHighscoreEntries()
         {
             float prefabHeight = highscoreEntryPrefab.GetComponent<RectTransform>().sizeDelta.y;
@@ -51,16 +48,16 @@ namespace Anatidae {
             }
 
             int i = 0;
-            foreach (var pair in HighscoreManager.Highscores)
+            foreach (HighscoreManager.HighscoreEntry entry in HighscoreManager.Highscores)
             {
-                GameObject entry = Instantiate(highscoreEntryPrefab, highscoreEntryContainer);
-                entry.transform.localPosition = new Vector3(
+                GameObject entryGo = Instantiate(highscoreEntryPrefab, highscoreEntryContainer);
+                entryGo.transform.localPosition = new Vector3(
                     0f,
                     -i * prefabHeight + 10f,
                     0f
                 );
-                HighscoreEntry highscoreEntry = entry.GetComponent<HighscoreEntry>();
-                highscoreEntry.SetData(pair.Key, pair.Value);
+                HighscoreEntryGo highscoreEntry = entryGo.GetComponent<HighscoreEntryGo>();
+                highscoreEntry.SetData(entry);
                 if (makeFirstBigger && i == 0)
                     highscoreEntry.SetScale(1.3f);
                 i++;

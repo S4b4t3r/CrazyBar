@@ -6,7 +6,6 @@
 
 using TMPro;
 using UnityEngine;
-using System;
 using System.Text.RegularExpressions;
 using System.Collections;
 
@@ -23,8 +22,6 @@ namespace Anatidae {
         private int nameLetterIndex = 0;
         private bool blockInput = false;
         private int highscore = 0;
-
-        private event Action mainThreadQueuedCallbacks;
 
         void Start()
         {
@@ -58,12 +55,6 @@ namespace Anatidae {
 
         void Update()
         {
-            if (mainThreadQueuedCallbacks != null)
-            {
-                mainThreadQueuedCallbacks.Invoke();
-                mainThreadQueuedCallbacks = null;
-            }
-
             letterCaroussel.anchoredPosition = Vector2.Lerp(letterCaroussel.anchoredPosition, new Vector2(-carousselLetterIndex * 140, 0), Time.deltaTime * 10);
 
             if (Input.GetButtonDown("P1_Left") || Input.GetButtonDown("P2_Left"))
@@ -82,19 +73,6 @@ namespace Anatidae {
             {
                 if (carousselLetterIndex == alphabet.Length - 2) { // Submit
                     HighscoreManager.PlayerName = Regex.Replace(new string(playerName), @"\0", "_");
-
-                    /*
-                    HighscoreManager.SetHighscore(HighscoreManager.PlayerName, highscore).ContinueWith(task => {
-                        Debug.Log($"{task.IsCanceled}, {task.IsCompleted}, {task.IsCompletedSuccessfully}, {task.IsFaulted}, {task.Status}, {task.Exception}");
-                        ;
-                        mainThreadQueuedCallbacks += FadeoutHighscoreInput;
-                        if (task.IsFaulted)
-                            Debug.LogError(task.Exception);
-                        else
-                            Debug.Log("HighscoreNameInput: Highscore submitted");
-                    });
-                    return;
-                    */
                     StartCoroutine(SetHighscore(HighscoreManager.PlayerName, highscore));
                 }
 
@@ -124,7 +102,7 @@ namespace Anatidae {
 
         IEnumerator SetHighscore(string name, int score)
         {
-            yield return HighscoreManager.SetHighscoreUnity(name, score);
+            yield return HighscoreManager.SetHighscore(name, score);
             Debug.Log("HighscoreNameInput: Highscore submitted");
             FadeoutHighscoreInput();
         }

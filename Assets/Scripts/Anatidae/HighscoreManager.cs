@@ -1,33 +1,31 @@
-/*
- Le HighscoreManager est un singleton qui permet de récupérer et d'envoyer des highscores à la borne en json, qui est un serveur Node.js.
- La méthode GetHighscores() retourne un Dictionary<string, int> des scores de la borne.
- Il s'occupe également d'écouter l'évènement OnApplicationQuit pour retourner au menu principal de la borne.
-*/
-
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using Newtonsoft.Json;
-using System.Threading.Tasks;
 using UnityEngine;
 using System.Linq;
 using UnityEngine.Networking;
 using System.Collections;
+using System.Data.Common;
 
 namespace Anatidae {
 
-    
     public class HighscoreManager : MonoBehaviour
     {
-        struct HighscoreData
+        [Serializable]
+        public struct HighscoreData
         {
-            public Dictionary<string, int> highscores;
+            public List<HighscoreEntry> highscores;
+        }
+
+        [Serializable]
+        public struct HighscoreEntry
+        {
+            public string name;
+            public int score;
         }
 
         public static HighscoreManager Instance { get; private set; }
-        public static Dictionary<string, int> Highscores { get; private set;}
+        public static List<HighscoreEntry> Highscores { get; private set;}
         public static bool HasFetchedHighscores { get; private set; }
         public static bool IsHighscoreInputScreenShown { get; private set; }
         public static string PlayerName;
@@ -112,36 +110,7 @@ namespace Anatidae {
             IsHighscoreInputScreenShown = false;
         }
 
-        public static async Task<Dictionary<string, int>> FetchHighscores()
-        {
-            HttpClient client = new HttpClient {
-                BaseAddress = new Uri("http://localhost:3000/api/?game=" + "WrecklessBar")
-            };
-            client.DefaultRequestHeaders.Accept.Add(
-            new MediaTypeWithQualityHeaderValue("application/json"));
-            HttpResponseMessage response = await client.GetAsync("");
-
-            if (response.IsSuccessStatusCode) {
-                string data = await response.Content.ReadAsStringAsync();
-                try {
-                    HighscoreData highscoreData = JsonConvert.DeserializeObject<HighscoreData>(data);
-                    Highscores = highscoreData.highscores;
-                    HasFetchedHighscores = true;
-                } catch (Exception e) {
-                    Debug.LogError(e);
-                    return null;
-                }
-                client.Dispose();
-                return Highscores;
-            }
-            else {
-                Debug.LogError($"{(int)response.StatusCode} ({response.ReasonPhrase})");
-                client.Dispose();
-                return null;
-            }
-        }
-
-        public static IEnumerator FetchHighscoresUnity()
+        public static IEnumerator FetchHighscores()
         {
             UnityWebRequest request = UnityWebRequest.Get("http://localhost:3000/api/?game=" + "WrecklessBar");
             yield return request.SendWebRequest();
@@ -154,7 +123,10 @@ namespace Anatidae {
             {
                 string data = request.downloadHandler.text;
                 try {
-                    HighscoreData highscoreData = JsonConvert.DeserializeObject<HighscoreData>(data);
+                    Debug.Log(data);
+                    HighscoreData highscoreData = JsonUtility.FromJson<HighscoreData>(data);
+                    Debug.Log(highscoreData);
+                    Debug.Log(highscoreData.highscores.Count);
                     Highscores = highscoreData.highscores;
                     HasFetchedHighscores = true;
                 } catch (Exception e) {
@@ -163,36 +135,11 @@ namespace Anatidae {
             }
         }
 
-        public static async Task<bool> SetHighscore(string name, int score)
-        {
-            HttpClient client = new HttpClient {
-                BaseAddress = new Uri("http://localhost:3000/api/?game=" + "WrecklessBar")
-            };
-            client.DefaultRequestHeaders.Accept.Add(
-                new MediaTypeWithQualityHeaderValue("application/json")
-            );
-
-            var content = new StringContent(JsonConvert.SerializeObject(new { name, score }));
-            Debug.Log(content.ReadAsStringAsync().Result); 
-            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-
-            HttpResponseMessage response = await client.PostAsync("", content);
-
-            if (response.IsSuccessStatusCode) {
-                return true;
-            }
-            else {
-                Debug.LogError($"{(int)response.StatusCode} ({response.Content.ReadAsStringAsync().Result})");
-                client.Dispose();
-                return false;
-            }
-        }
-
-        public static IEnumerator SetHighscoreUnity(string name, int score)
+        public static IEnumerator SetHighscore(string name, int score)
         {
             UnityWebRequest request = UnityWebRequest.Post(
                 "http://localhost:3000/api/?game=" + "WrecklessBar",
-                JsonConvert.SerializeObject(new { name, score })
+                JsonUtility.ToJson(new { name, score })
             );
             yield return request.SendWebRequest();
 
@@ -213,12 +160,12 @@ namespace Anatidae {
                     return false;
                 if (Highscores.Count < 10)
                     return true;
-                if (Highscores.Values.Skip(9).Take(1).First() < score)
+                if (score > Highscores[Highscores.Count - 1].score)
                     return true;
             } else {
-                if (Highscores.ContainsKey(name))
-                    if (Highscores[name] < score)
-                        return true;
+                HighscoreEntry? entry = Highscores.Find(entry => entry.name == name);
+                if(entry?.score < score)
+                    return true;
             }
             return false;
         }
