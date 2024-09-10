@@ -20,11 +20,6 @@ public class UIController : MonoBehaviour
             case "MainMenuScene":
                 Anatidae.HighscoreManager.ShowHighscores();
                 break;
-            case "Game":
-                retryPrompt.SetActive(false);
-                tutorialPrompt.SetActive(false);
-                break;
-
         }
     }
 
@@ -41,8 +36,10 @@ public class UIController : MonoBehaviour
                 }
                 break;
             case "MainMenuScene":
-                if (Input.GetButtonDown("P1_B1"))
+                if (Input.GetButtonDown("P1_B1")) {
+                    GetComponent<AudioSource>().Play();
                     RetryBtn();
+                }
                 break;
         }
     }
@@ -51,10 +48,7 @@ public class UIController : MonoBehaviour
     {
         if (isHighscore && Anatidae.HighscoreManager.IsHighscore(score))
         {
-            if (Anatidae.HighscoreManager.PlayerName == null)
-                Anatidae.HighscoreManager.ShowHighscoreInput(score);
-            else
-                StartCoroutine(SetHighscore(Anatidae.HighscoreManager.PlayerName, score));
+            Anatidae.HighscoreManager.ShowHighscoreInput(score);
         }
 
         scoreText.text = "Score: " + score.ToString() + "\n" + "HiScore: " + hiScore.ToString();
